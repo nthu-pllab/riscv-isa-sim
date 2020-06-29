@@ -72,6 +72,7 @@ void sim_t::interactive()
   funcs["fregs"] = &sim_t::interactive_fregs;
   funcs["fregd"] = &sim_t::interactive_fregd;
   funcs["pc"] = &sim_t::interactive_pc;
+  funcs["ic"] = &sim_t::interactive_ic;
   funcs["mem"] = &sim_t::interactive_mem;
   funcs["str"] = &sim_t::interactive_str;
   funcs["until"] = &sim_t::interactive_until_silent;
@@ -122,6 +123,7 @@ void sim_t::interactive_help(const std::string& cmd, const std::vector<std::stri
     "fregd <core> <reg>              # Display double precision <reg> in <core>\n"
     "vreg <core> [reg]               # Display vector [reg] (all if omitted) in <core>\n"
     "pc <core>                       # Show current PC in <core>\n"
+    "ic <core>                       # Show current instruction and cycle count in <core>\n"
     "mem <hex addr>                  # Show contents of physical memory\n"
     "str <hex addr>                  # Show NUL-terminated C string\n"
     "until reg <core> <reg> <val>    # Stop when <reg> in <core> hits <val>\n"
@@ -180,8 +182,24 @@ void sim_t::interactive_pc(const std::string& cmd, const std::vector<std::string
   fprintf(stderr, "0x%016" PRIx64 "\n", get_pc(args));
 }
 
-reg_t sim_t::get_reg(const std::vector<std::string>& args)
+void sim_t::interactive_ic(const std::string &cmd, const std::vector<std::string>& args)
 {
+  FILE *pfile = fopen("cycle.log", "a");
+  if (pfile == NULL) {
+    fprintf(stderr, "cycle.log can not open.");
+    exit(1);
+  }
+  processor_t *p = get_core(args[0]);
+  long long cur_insn = p->get_state()->insn_count;
+  long long cur_cycle = p->get_state()->cycle_count;
+  fprintf(stderr, "insn: %lld\n", cur_insn);
+  fprintf(stderr, "cycle: %lld\n", cur_cycle);
+  fprintf(pfile, "insn: %lld\n", cur_insn);
+  fprintf(pfile, "cycle: %lld\n", cur_cycle);
+  fclose(pfile);
+}
+
+    reg_t sim_t::get_reg(const std::vector<std::string> &args) {
   if(args.size() != 2)
     throw trap_interactive();
 

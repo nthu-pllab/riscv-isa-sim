@@ -151,6 +151,10 @@ private:
   T data[N];
 };
 
+// instruction/cycle count macro
+#define ADD_INSN_COUNT(val) p->get_state()->insn_count += val
+#define ADD_CYCLE_COUNT(val) p->get_state()->cycle_count += val
+
 // helpful macros, etc
 #define MMU (*p->get_mmu())
 #define STATE (*p->get_state())
