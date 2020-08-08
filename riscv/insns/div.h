@@ -7,3 +7,5 @@ else if(lhs == INT64_MIN && rhs == -1)
   WRITE_RD(lhs);
 else
   WRITE_RD(sext_xlen(lhs / rhs));
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(1);

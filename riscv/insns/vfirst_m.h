@@ -18,3 +18,5 @@ for (reg_t i=P.VU.vstart; i < vl; ++i) {
 }
 P.VU.vstart = 0;
 WRITE_RD(pos);
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

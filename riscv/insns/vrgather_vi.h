@@ -29,3 +29,5 @@ for (reg_t i = P.VU.vstart; i < vl; ++i) {
 }
 
 VI_LOOP_END;
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

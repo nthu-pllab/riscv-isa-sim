@@ -11,3 +11,5 @@ VI_XI_LOOP_CARRY
   carry = (res >> sew) & 0x1u;
   vd = (vd & ~mmask) | ((carry << mpos) & mmask);
 })
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

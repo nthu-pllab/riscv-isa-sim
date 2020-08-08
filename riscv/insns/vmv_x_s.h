@@ -28,3 +28,5 @@ if (!(rs1 >= 0 && rs1 < (P.VU.get_vlen() / sew))) {
 }
 
 P.VU.vstart = 0;
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

@@ -8,3 +8,5 @@ VI_VFP_LOOP_BASE
   P.VU.elt<int64_t>(rd_num, i, true) = f32_to_i64(vs2, STATE.frm, true);
   set_fp_exceptions;
 VI_VFP_LOOP_WIDE_END
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

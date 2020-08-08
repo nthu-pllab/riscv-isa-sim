@@ -10,3 +10,5 @@ VI_VX_ULOOP
   P.VU.vxsat |= sat;
 
 })
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

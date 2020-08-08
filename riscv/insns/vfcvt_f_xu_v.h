@@ -8,3 +8,5 @@ VI_VFP_VF_LOOP
   auto vs2_u = P.VU.elt<uint64_t>(rs2_num, i);
   vd = ui64_to_f64(vs2_u);
 })
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

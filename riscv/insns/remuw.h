@@ -6,3 +6,5 @@ if(rhs == 0)
   WRITE_RD(sext32(lhs));
 else
   WRITE_RD(sext32(lhs % rhs));
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(1);

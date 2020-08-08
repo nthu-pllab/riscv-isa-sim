@@ -5,3 +5,5 @@ if(rhs == 0)
   WRITE_RD(sext_xlen(RS1));
 else
   WRITE_RD(sext_xlen(lhs % rhs));
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(1);

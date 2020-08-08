@@ -7,3 +7,5 @@ if (isNaNF128(f128(FRS1)) && isNaNF128(f128(FRS2)))
 else
   WRITE_FRD(greater || isNaNF128(f128(FRS2)) ? FRS1 : FRS2);
 set_fp_exceptions;
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(1);

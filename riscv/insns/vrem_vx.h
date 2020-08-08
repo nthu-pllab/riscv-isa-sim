@@ -8,3 +8,5 @@ VI_VX_LOOP
   else
     vd = vs2 % rs1;
 })
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

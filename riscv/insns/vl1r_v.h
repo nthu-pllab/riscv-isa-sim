@@ -7,3 +7,5 @@ for (reg_t i = 0; i < P.VU.vlenb; ++i) {
   P.VU.elt<uint8_t>(vd, i, true) = val;
 }
 P.VU.vstart = 0;
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

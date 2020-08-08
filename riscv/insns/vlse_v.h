@@ -11,3 +11,5 @@ if (sew == e8) {
   VI_LD(i * RS2, fn, int64, 8);
 }
 
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

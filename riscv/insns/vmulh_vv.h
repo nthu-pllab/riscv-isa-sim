@@ -3,3 +3,5 @@ VI_VV_LOOP
 ({
   vd = ((int128_t)vs2 * vs1) >> sew;
 })
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

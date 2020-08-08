@@ -6,3 +6,5 @@ VI_VFP_VV_LOOP
 {
   vd.v = f64_classify(vs2);
 })
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

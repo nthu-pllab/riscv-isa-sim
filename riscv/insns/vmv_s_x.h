@@ -28,3 +28,5 @@ if (vl > 0 && P.VU.vstart < vl) {
 }
 
 P.VU.vstart = 0;
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

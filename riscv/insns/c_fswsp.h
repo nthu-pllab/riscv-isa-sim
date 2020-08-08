@@ -6,3 +6,5 @@ if (xlen == 32) {
 } else { // c.sdsp
   MMU.store_uint64(RVC_SP + insn.rvc_sdsp_imm(), RVC_RS2);
 }
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(1);

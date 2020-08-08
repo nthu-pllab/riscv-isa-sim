@@ -1,2 +1,4 @@
 require_rv64;
 WRITE_RD(sext32((uint32_t)RS1 >> SHAMT));
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(1);

@@ -7,3 +7,5 @@ if (isNaNF32UI(f32(FRS1).v) && isNaNF32UI(f32(FRS2).v))
 else
   WRITE_FRD(greater || isNaNF32UI(f32(FRS2).v) ? FRS1 : FRS2);
 set_fp_exceptions;
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(1);

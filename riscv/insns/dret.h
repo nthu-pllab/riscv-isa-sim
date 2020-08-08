@@ -7,3 +7,5 @@ STATE.debug_mode = false;
 
 if (STATE.dcsr.step)
   STATE.single_step = STATE.STEP_STEPPING;
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(1);

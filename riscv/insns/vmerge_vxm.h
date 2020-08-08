@@ -9,3 +9,5 @@ VI_VVXI_MERGE_LOOP
 
   vd = use_first ? rs1 : vs2;
 })
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

@@ -10,3 +10,5 @@ if (sew == e8) {
 } else if (sew == e64) {
   VI_LD_INDEX(index[i], fn, int64, 8);
 }
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

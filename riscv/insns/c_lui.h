@@ -6,3 +6,5 @@ if (insn.rvc_rd() == 2) { // c.addi16sp
   require(insn.rvc_imm() != 0);
   WRITE_RD(insn.rvc_imm() << 12);
 }
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(1);

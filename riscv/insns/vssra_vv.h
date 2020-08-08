@@ -8,3 +8,5 @@ VI_VV_LOOP
   INT_ROUNDING(val, xrm, sh);
   vd = val >> sh;
 })
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

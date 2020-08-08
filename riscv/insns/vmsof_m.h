@@ -28,3 +28,5 @@ for (reg_t i = P.VU.vstart ; i < vl; ++i) {
     vd = (vd & ~mmask) | ((res << mpos) & mmask);
   }
 }
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

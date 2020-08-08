@@ -3,3 +3,5 @@ VI_VV_LOOP_NSHIFT
 ({
   vd = vs2_u >> (vs1 & (sew * 2 - 1));
 }, true)
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

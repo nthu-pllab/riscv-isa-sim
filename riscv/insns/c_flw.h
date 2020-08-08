@@ -6,3 +6,5 @@ if (xlen == 32) {
 } else { // c.ld
   WRITE_RVC_RS2S(MMU.load_int64(RVC_RS1S + insn.rvc_ld_imm()));
 }
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(1);

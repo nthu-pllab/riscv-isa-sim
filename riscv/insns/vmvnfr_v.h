@@ -13,3 +13,5 @@ if (vd != vs2) {
   }
 }
 P.VU.vstart = 0;
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

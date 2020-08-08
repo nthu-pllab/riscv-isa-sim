@@ -30,3 +30,5 @@ for (reg_t i = P.VU.vstart ; i < P.VU.vl; ++i) {
 }
 
 P.VU.vstart = 0;
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

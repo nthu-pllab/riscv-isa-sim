@@ -6,3 +6,5 @@ VI_VFP_VF_LOOP
 {
   vd = f64_mulAdd(f64(vd.v ^ F64_SIGN), rs1, vs2);
 })
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);

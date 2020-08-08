@@ -8,3 +8,5 @@ VI_VV_LOOP_WITH_CARRY
   uint128_t res = (op_mask & vs1) + (op_mask & vs2) + carry;
   vd = res;
 })
+ADD_INSN_COUNT(1);
+ADD_CYCLE_COUNT(3);
