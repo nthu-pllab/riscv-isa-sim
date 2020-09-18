@@ -22,6 +22,7 @@ Spike supports the following RISC-V ISA features:
   - Conformance to both RVWMO and RVTSO (Spike is sequentially consistent)
   - Machine, Supervisor, and User modes, v1.11
   - Debug v0.14
+  - P extension by PLLab for Apache TVM
 
 Versioning and APIs
 -------------------
