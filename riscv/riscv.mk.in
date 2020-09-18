@@ -785,6 +785,13 @@ riscv_insn_priv = \
 	sret \
 	wfi \
 
+riscv_insn_ext_p = \
+	kadd32 \
+	smaqa \
+	smaqa_su \
+	pkbb32 \
+	pkbt32 \
+	pktb32 \
 
 riscv_insn_list = \
 	$(riscv_insn_ext_a) \
@@ -795,6 +802,7 @@ riscv_insn_list = \
 	$(riscv_insn_ext_d) \
 	$(riscv_insn_ext_zfh) \
 	$(riscv_insn_ext_q) \
+	$(riscv_insn_ext_p) \
 	$(if $(HAVE_INT128),$(riscv_insn_ext_v),) \
 	$(riscv_insn_ext_h) \
 	$(riscv_insn_priv) \

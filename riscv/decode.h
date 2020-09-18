@@ -17,6 +17,7 @@
 #include "softfloat_types.h"
 #include "specialize.h"
 #include <cinttypes>
+#include <bits/stdint-uintn.h>
 
 typedef int64_t sreg_t;
 typedef uint64_t reg_t;
@@ -67,6 +68,7 @@ const int NCSR = 4096;
   (((x) & 0x03) < 0x03 ? 2 : \
    ((x) & 0x1f) < 0x1f ? 4 : \
    ((x) & 0x3f) < 0x3f ? 6 : \
+   ((x) & 0x7f) == 0x7f ? 4 : \
    8)
 #define MAX_INSN_LENGTH 8
 #define PC_ALIGN 2
@@ -2375,6 +2377,103 @@ for (reg_t i = 0; i < P.VU.vlmax && P.VU.vl != 0; ++i) { \
       require(0); \
       break; \
   }
+
+// rvp macro
+#define P_FIELD(R, INDEX, TYPE) (*((TYPE*)(void*)(&R + 1) - INDEX - 1))
+#define P_B(R, INDEX) P_FIELD(R, INDEX, uint8_t)
+#define P_H(R, INDEX) P_FIELD(R, INDEX, uint16_t)
+#define P_W(R, INDEX) P_FIELD(R, INDEX, uint32_t)
+
+#define WRITE_PD memcpy(&P_FIELD(rd_tmp, i, decltype(pd)), &pd, sizeof(pd));
+
+#define P_LOOP_BASE(BIT) \
+  reg_t rd_tmp = 0; \
+  reg_t rs1 = RS1; \
+  reg_t rs2 = RS2; \
+  unsigned len = xlen / BIT; \
+  for (int i = len - 1; i >= 0; --i){ 
+
+#define P_REDUCTION_LOOP_BASE(BIT) \
+  reg_t rd_tmp = 0; \
+  type_sew_t<32>::type pd1 = 0; \
+  type_sew_t<32>::type pd2 = 0; \
+  reg_t rs1 = RS1; \
+  reg_t rs2 = RS2; \
+  unsigned len = xlen / BIT; \
+  for (int i = len - 1; i >= 0; --i){ 
+
+#define P_PACK_LOOP_BASE(BIT) \
+  unsigned len = xlen / BIT; \
+  reg_t rd_tmp = 0; \
+  reg_t rs1 = RS1; \
+  reg_t rs2 = RS2; \
+  type_sew_t<BIT>::type ps1[len]; \
+  type_sew_t<BIT>::type ps2[len]; \
+  for (int i = len - 1; i >= 0; --i){ \
+    ps1[i] = P_FIELD(rs1, i, type_sew_t<BIT>::type); \
+    ps2[i] = P_FIELD(rs2, i, type_sew_t<BIT>::type); \
+  } \
+  for (int i = len - 1; i >= 0; --i){ \
+    type_sew_t<BIT>::type pd = P_FIELD(rd_tmp, i, type_sew_t<BIT>::type);
+
+#define P_PARAMS(x) \
+  type_sew_t<x>::type pd = P_FIELD(rd_tmp, i, type_sew_t<x>::type); \
+  type_sew_t<x>::type ps1 = P_FIELD(rs1, i, type_sew_t<x>::type); \
+  type_sew_t<x>::type ps2 = P_FIELD(rs2, i, type_sew_t<x>::type); 
+
+#define P_ELE_PARAMS(x) \
+  ps1 = P_FIELD(rs1, i, type_sew_t<x>::type); \
+  ps2 = P_FIELD(rs2, i, type_sew_t<x>::type); 
+
+#define P_ELE_SU_PARAMS(x) \
+  ps1 = P_FIELD(rs1, i, type_sew_t<x>::type); \
+  ps2 = P_FIELD(rs2, i, type_usew_t<x>::type); 
+
+
+#define P_LOOP_BODY(x, BODY) { \
+  P_PARAMS(x) \
+  BODY \
+  WRITE_PD \
+}
+
+#define P_REDUCTION_LOOP_BODY(x, BODY, IS_SU) { \
+  type_sew_t<x>::type ps1 = 0; \
+  type_usew_t<x>::type ps2 = 0; \
+  if (IS_SU) { \
+    P_ELE_SU_PARAMS(x) \
+  } else { \
+    P_ELE_PARAMS(x) \
+  } \
+  BODY \
+  memcpy(&P_FIELD(rd_tmp, 0, decltype(pd1)), &pd1, sizeof(pd1)); \
+  memcpy(&P_FIELD(rd_tmp, 1, decltype(pd2)), &pd2, sizeof(pd2)); \
+}
+
+#define P_LOOP_END() \
+  } \
+  WRITE_RD(rd_tmp);
+
+
+#define P_LOOP(BIT, BODY) \
+  require(BIT == e8 || BIT == e16 || BIT == e32); \
+  P_LOOP_BASE(BIT) \
+  P_LOOP_BODY(BIT, BODY) \
+  P_LOOP_END() 
+
+#define P_REDUCTION_LOOP(BIT, BODY, IS_SU) \
+  require(BIT == e8 || BIT == e16); \
+  P_REDUCTION_LOOP_BASE(BIT) \
+  P_REDUCTION_LOOP_BODY(BIT, BODY, IS_SU) \
+  P_LOOP_END()
+
+#define P_PACK_LOOP(BIT, BODY) \
+  require(BIT == e16 || BIT == e32); \
+  P_PACK_LOOP_BASE(BIT) \
+  BODY \
+  WRITE_PD \
+  P_LOOP_END()
+
+
 
 #define DEBUG_START             0x0
 #define DEBUG_END               (0x1000 - 1)
