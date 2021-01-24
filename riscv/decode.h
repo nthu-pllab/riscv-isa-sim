@@ -16,6 +16,7 @@
 #include "common.h"
 #include "softfloat_types.h"
 #include "specialize.h"
+#include "arith.h"
 #include <cinttypes>
 #include <bits/stdint-uintn.h>
 
@@ -2378,101 +2379,103 @@ for (reg_t i = 0; i < P.VU.vlmax && P.VU.vl != 0; ++i) { \
       break; \
   }
 
-// rvp macro
-#define P_FIELD(R, INDEX, TYPE) (*((TYPE*)(void*)(&R + 1) - INDEX - 1))
-#define P_B(R, INDEX) P_FIELD(R, INDEX, uint8_t)
-#define P_H(R, INDEX) P_FIELD(R, INDEX, uint16_t)
-#define P_W(R, INDEX) P_FIELD(R, INDEX, uint32_t)
+// For RVP
 
-#define WRITE_PD memcpy(&P_FIELD(rd_tmp, i, decltype(pd)), &pd, sizeof(pd));
+#define P_FIELD(R, INDEX, SIZE) \
+  (type_sew_t<SIZE>::type)get_field(R, make_mask64(((INDEX) * SIZE), SIZE))
 
-#define P_LOOP_BASE(BIT) \
-  reg_t rd_tmp = 0; \
-  reg_t rs1 = RS1; \
-  reg_t rs2 = RS2; \
-  unsigned len = xlen / BIT; \
-  for (int i = len - 1; i >= 0; --i){ 
+#define P_UFIELD(R, INDEX, SIZE) \
+  (type_usew_t<SIZE>::type)get_field(R, make_mask64(((INDEX) * SIZE), SIZE))
 
-#define P_REDUCTION_LOOP_BASE(BIT) \
-  reg_t rd_tmp = 0; \
-  type_sew_t<32>::type pd1 = 0; \
-  type_sew_t<32>::type pd2 = 0; \
-  reg_t rs1 = RS1; \
-  reg_t rs2 = RS2; \
-  unsigned len = xlen / BIT; \
-  for (int i = len - 1; i >= 0; --i){ 
+#define P_PARAMS(BIT) \
+  auto pd = P_FIELD(rd_tmp, i, BIT); \
+  auto ps1 = P_FIELD(rs1, i, BIT); \
+  auto ps2 = P_FIELD(rs2, i, BIT);
 
-#define P_PACK_LOOP_BASE(BIT) \
-  unsigned len = xlen / BIT; \
-  reg_t rd_tmp = 0; \
-  reg_t rs1 = RS1; \
-  reg_t rs2 = RS2; \
-  type_sew_t<BIT>::type ps1[len]; \
-  type_sew_t<BIT>::type ps2[len]; \
-  for (int i = len - 1; i >= 0; --i){ \
-    ps1[i] = P_FIELD(rs1, i, type_sew_t<BIT>::type); \
-    ps2[i] = P_FIELD(rs2, i, type_sew_t<BIT>::type); \
-  } \
-  for (int i = len - 1; i >= 0; --i){ \
-    type_sew_t<BIT>::type pd = P_FIELD(rd_tmp, i, type_sew_t<BIT>::type);
+#define P_REDUCTION_PARAMS(BIT_INNER) \
+  auto ps1 = P_FIELD(rs1, j, BIT_INNER); \
+  auto ps2 = P_FIELD(rs2, j, BIT_INNER);
 
-#define P_PARAMS(x) \
-  type_sew_t<x>::type pd = P_FIELD(rd_tmp, i, type_sew_t<x>::type); \
-  type_sew_t<x>::type ps1 = P_FIELD(rs1, i, type_sew_t<x>::type); \
-  type_sew_t<x>::type ps2 = P_FIELD(rs2, i, type_sew_t<x>::type); 
+#define P_REDUCTION_SUPARAMS(BIT_INNER) \
+  auto ps1 = P_FIELD(rs1, j, BIT_INNER); \
+  auto ps2 = P_UFIELD(rs2, j, BIT_INNER);
 
-#define P_ELE_PARAMS(x) \
-  ps1 = P_FIELD(rs1, i, type_sew_t<x>::type); \
-  ps2 = P_FIELD(rs2, i, type_sew_t<x>::type); 
+#define WRITE_PD() \
+  rd_tmp = set_field(rd_tmp, make_mask64((i * sizeof(pd) * 8), sizeof(pd) * 8), pd);
 
-#define P_ELE_SU_PARAMS(x) \
-  ps1 = P_FIELD(rs1, i, type_sew_t<x>::type); \
-  ps2 = P_FIELD(rs2, i, type_usew_t<x>::type); 
-
-
-#define P_LOOP_BODY(x, BODY) { \
-  P_PARAMS(x) \
-  BODY \
-  WRITE_PD \
-}
-
-#define P_REDUCTION_LOOP_BODY(x, BODY, IS_SU) { \
-  type_sew_t<x>::type ps1 = 0; \
-  type_usew_t<x>::type ps2 = 0; \
-  if (IS_SU) { \
-    P_ELE_SU_PARAMS(x) \
-  } else { \
-    P_ELE_PARAMS(x) \
-  } \
-  BODY \
-  memcpy(&P_FIELD(rd_tmp, 0, decltype(pd1)), &pd1, sizeof(pd1)); \
-  memcpy(&P_FIELD(rd_tmp, 1, decltype(pd2)), &pd2, sizeof(pd2)); \
-}
+#define P_SAT(R, BIT) \
+  if (R > INT##BIT##_MAX) { \
+    R = INT##BIT##_MAX; \
+  } else if (R < INT##BIT##_MIN) { \
+    R = INT##BIT##_MIN; \
+  }
 
 #define P_LOOP_END() \
   } \
   WRITE_RD(rd_tmp);
 
+#define P_REDUCTION_LOOP_END(BIT, IS_SAT) \
+    } \
+    if (IS_SAT) { \
+      P_SAT(pd_res, BIT); \
+    } \
+    type_usew_t<BIT>::type pd = pd_res; \
+    WRITE_PD(); \
+  } \
+  WRITE_RD(rd_tmp);
+
+#define P_LOOP_BASE(BIT) \
+  require(BIT == e8 || BIT == e16 || BIT == e32); \
+  reg_t rd_tmp = RD; \
+  reg_t rs1 = RS1; \
+  reg_t rs2 = RS2; \
+  sreg_t len = xlen / BIT; \
+  for (sreg_t i = len - 1; i >= 0; --i) {
+
+#define P_REDUCTION_LOOP_BASE(BIT, BIT_INNER, USE_RD) \
+  require(BIT == e16 || BIT == e32 || BIT == e64); \
+  reg_t rd_tmp = USE_RD ? RD : 0; \
+  reg_t rs1 = RS1; \
+  reg_t rs2 = RS2; \
+  sreg_t len = xlen / BIT; \
+  sreg_t len_inner = BIT / BIT_INNER; \
+  for (sreg_t i = len - 1; i >= 0; --i) { \
+    sreg_t pd_res = P_FIELD(rd_tmp, i, BIT); \
+    for (sreg_t j = i * len_inner; j < (i + 1) * len_inner; ++j) {
+
+#define P_REDUCTION_SULOOP(BIT, BIT_INNER, USE_RD, IS_SAT, BODY) \
+  P_REDUCTION_LOOP_BASE(BIT, BIT_INNER, USE_RD) \
+  P_REDUCTION_SUPARAMS(BIT_INNER) \
+  BODY \
+  P_REDUCTION_LOOP_END(BIT, IS_SAT)
+
+#define P_LOOP_BODY(BIT, BODY) { \
+  P_PARAMS(BIT) \
+  BODY \
+  WRITE_PD(); \
+}
+
+#define P_REDUCTION_LOOP(BIT, BIT_INNER, USE_RD, IS_SAT, BODY) \
+  P_REDUCTION_LOOP_BASE(BIT, BIT_INNER, USE_RD) \
+  P_REDUCTION_PARAMS(BIT_INNER) \
+  BODY \
+  P_REDUCTION_LOOP_END(BIT, IS_SAT)
 
 #define P_LOOP(BIT, BODY) \
-  require(BIT == e8 || BIT == e16 || BIT == e32); \
   P_LOOP_BASE(BIT) \
   P_LOOP_BODY(BIT, BODY) \
-  P_LOOP_END() 
-
-#define P_REDUCTION_LOOP(BIT, BODY, IS_SU) \
-  require(BIT == e8 || BIT == e16); \
-  P_REDUCTION_LOOP_BASE(BIT) \
-  P_REDUCTION_LOOP_BODY(BIT, BODY, IS_SU) \
   P_LOOP_END()
 
-#define P_PACK_LOOP(BIT, BODY) \
+#define P_PK(BIT, X, Y) \
   require(BIT == e16 || BIT == e32); \
-  P_PACK_LOOP_BASE(BIT) \
-  BODY \
-  WRITE_PD \
-  P_LOOP_END()
-
+  reg_t size = BIT / 8 * 2; \
+  reg_t rd_tmp = 0; \
+  type_usew_t<BIT>::type pd[2] = { \
+    P_UFIELD(RS1, Y, BIT), \
+    P_UFIELD(RS1, X, BIT) \
+  }; \
+  memcpy(&rd_tmp, pd, size); \
+  WRITE_RD(rd_tmp);
 
 
 #define DEBUG_START             0x0

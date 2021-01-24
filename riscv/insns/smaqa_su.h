@@ -1,8 +1,4 @@
 require_rv64;
-P_REDUCTION_LOOP(8, {
-  if (i < 4) {
-    pd1 += ((int32_t)ps1 * static_cast<int>(ps2));
-  } else {
-    pd2 += ((int32_t)ps1 * static_cast<int>(ps2));
-  }
-}, true);
+P_REDUCTION_SULOOP(32, 8, true, false, {
+  pd_res += ps1 * ps2;
+})

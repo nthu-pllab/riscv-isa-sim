@@ -1,4 +1,4 @@
 require_rv64;
-P_REDUCTION_LOOP(32, 8, true, false, {
+P_REDUCTION_LOOP(32, 16, true, true, {
   pd_res += ps1 * ps2;
 })
