@@ -194,14 +194,17 @@ void sim_t::interactive_ic(const std::string &cmd, const std::vector<std::string
   processor_t *p = get_core(args[0]);
   long long cur_insn = p->get_state()->insn_count;
   long long cur_cycle = p->get_state()->cycle_count;
+  fprintf(stderr, "\n");
   fprintf(stderr, "insn: %lld\n", cur_insn);
   fprintf(stderr, "cycle: %lld\n", cur_cycle);
+  fprintf(pfile, "\n");
   fprintf(pfile, "insn: %lld\n", cur_insn);
   fprintf(pfile, "cycle: %lld\n", cur_cycle);
   fclose(pfile);
 }
 
-    reg_t sim_t::get_reg(const std::vector<std::string> &args) {
+reg_t sim_t::get_reg(const std::vector<std::string> &args)
+{
   if(args.size() != 2)
     throw trap_interactive();
 
