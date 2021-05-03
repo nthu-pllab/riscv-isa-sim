@@ -18,7 +18,8 @@ VI_VV_LOOP
   int32_t vd_3 = (static_cast<int32_t>(vs2_3) * static_cast<int32_t>(vs1_3));
 
   // vd += vs2 * vs1;
-  vd = (vd_0 + vd_1 + vd_2 + vd_3);
+  vd += (vd_0 + vd_1 + vd_2 + vd_3);
+  // vd = (vd_0 + vd_1 + vd_2 + vd_3);
 })
 ADD_INSN_COUNT(1);
 ADD_CYCLE_COUNT(3);
